@@ -3,7 +3,7 @@
 . .\utils.ps1
 
 $csvFile = Join-Path $parentDir "deadline_check.csv"
-"Directory,Last Commit Date,Hours Late,Deduction" | Set-Content -Path $csvFile
+"Directory,Last Commit Date,Hours Late,Deduction,Beyond Zero Deadline" | Set-Content -Path $csvFile
 
 Set-Location -Path $parentDir
 
@@ -12,7 +12,8 @@ Get-ChildItem -Directory | ForEach-Object {
     $lastCommitDate = Get-LastCommitDate $_.FullName
     $deduction = Calculate-Deduction $lastCommitDate $lateStartDate $zeroScoreDeadline
     $hoursLate = if ($deduction -gt 0 -and $deduction -lt 100) { $deduction } else { 0 }
-    "$($_.Name),$lastCommitDate,$hoursLate,$deduction" | Add-Content -Path $csvFile
+    $beyondZeroDeadline = if ($lastCommitDate -gt $zeroScoreDeadline) { $true } else { $false }
+    "$($_.Name),$lastCommitDate,$hoursLate,$deduction,$beyondZeroDeadline" | Add-Content -Path $csvFile
     Write-Host "------------------------" -ForegroundColor DarkGray
 }
 
